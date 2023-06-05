@@ -27,7 +27,8 @@ import (
 )
 
 const (
-	ReportDelta = time.Second
+	ReportDelta           = time.Second
+	ResetThresholdPackets = 100
 )
 
 type pendingPacket struct {
@@ -76,6 +77,8 @@ type Buffer struct {
 	lastPacketRead int
 
 	pliThrottle int64
+
+	consecutiveOldPackets int
 
 	rtpStats             *RTPStats
 	rrSnapshotId         uint32
@@ -410,9 +413,15 @@ func (b *Buffer) calc(pkt []byte, arrivalTime time.Time) {
 
 		if err != bucket.ErrRTXPacket {
 			b.logger.Warnw("could not add RTP packet to bucket", err)
+			b.consecutiveOldPackets++
+			if b.consecutiveOldPackets >= ResetThresholdPackets {
+				b.bucket.ResyncOnNextPacket()
+			}
 		}
 		return
 	}
+
+	b.consecutiveOldPackets = 0
 
 	var p rtp.Packet
 	err = p.Unmarshal(pktBuf)

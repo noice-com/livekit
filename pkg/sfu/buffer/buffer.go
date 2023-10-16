@@ -48,6 +48,7 @@ const (
 
 	InitPacketBufferSizeVideo = 300
 	InitPacketBufferSizeAudio = 70
+	ResetThresholdPackets     = 100
 )
 
 type pendingPacket struct {
@@ -132,6 +133,7 @@ type Buffer struct {
 	packetNotFoundCount   atomic.Uint32
 	packetTooOldCount     atomic.Uint32
 	extPacketTooMuchCount atomic.Uint32
+	consecutiveOldPackets int
 
 	primaryBufferForRTX *Buffer
 	rtxPktBuf           []byte
@@ -573,11 +575,17 @@ func (b *Buffer) calc(rawPkt []byte, rtpPacket *rtp.Packet, arrivalTime time.Tim
 			if (packetTooOldCount-1)%100 == 0 {
 				b.logger.Warnw("could not add packet to bucket", err, "count", packetTooOldCount)
 			}
+			b.consecutiveOldPackets++
+			if b.consecutiveOldPackets >= ResetThresholdPackets {
+				b.bucket.ResyncOnNextPacket()
+			}
 		} else if err != bucket.ErrRTXPacket {
 			b.logger.Warnw("could not add packet to bucket", err)
 		}
 		return
 	}
+
+	b.consecutiveOldPackets = 0
 
 	ep := b.getExtPacket(rtpPacket, arrivalTime, flowState)
 	if ep == nil {

@@ -532,31 +532,32 @@ func (r *RTPStatsSender) UpdateFromReceiverReport(rr rtcp.ReceptionReport) (rtt 
 		}
 
 		if int64(extReceivedRRSN-s.extLastRRSN) < 0 || (extReceivedRRSN-s.extLastRRSN) > (1<<15) {
-			timeSinceLastRR := time.Since(r.lastRRTime)
-			if r.lastRRTime.IsZero() {
-				timeSinceLastRR = time.Since(r.startTime)
-			}
-			r.logger.Infow(
-				"rr interval too big, skipping",
-				"lastRRTime", r.lastRRTime.String(),
-				"lastRR", r.lastRR,
-				"timeSinceLastRR", timeSinceLastRR.String(),
-				"receivedRR", rr,
-				"extStartSN", r.extStartSN,
-				"extHighestSN", r.extHighestSN,
-				"extStartTS", r.extStartTS,
-				"extHighestTS", r.extHighestTS,
-				"extLastRRSN", s.extLastRRSN,
-				"firstTime", r.firstTime.String(),
-				"startTime", r.startTime.String(),
-				"highestTime", r.highestTime.String(),
-				"extReceivedRRSN", extReceivedRRSN,
-				"packetsInInterval", extReceivedRRSN-s.extLastRRSN,
-				"extHighestSNFromRR", r.extHighestSNFromRR,
-				"packetsLostFromRR", r.packetsLostFromRR,
-				"firstSR", r.srFirst,
-				"lastSR", r.srNewest,
-			)
+			// timeSinceLastRR could be ~1s in our case, just disable it for now
+			// timeSinceLastRR := time.Since(r.lastRRTime)
+			// if r.lastRRTime.IsZero() {
+			// 	timeSinceLastRR = time.Since(r.startTime)
+			// }
+			// r.logger.Infow(
+			// 	"rr interval too big, skipping",
+			// 	"lastRRTime", r.lastRRTime.String(),
+			// 	"lastRR", r.lastRR,
+			// 	"timeSinceLastRR", timeSinceLastRR.String(),
+			// 	"receivedRR", rr,
+			// 	"extStartSN", r.extStartSN,
+			// 	"extHighestSN", r.extHighestSN,
+			// 	"extStartTS", r.extStartTS,
+			// 	"extHighestTS", r.extHighestTS,
+			// 	"extLastRRSN", s.extLastRRSN,
+			// 	"firstTime", r.firstTime.String(),
+			// 	"startTime", r.startTime.String(),
+			// 	"highestTime", r.highestTime.String(),
+			// 	"extReceivedRRSN", extReceivedRRSN,
+			// 	"packetsInInterval", extReceivedRRSN-s.extLastRRSN,
+			// 	"extHighestSNFromRR", r.extHighestSNFromRR,
+			// 	"packetsLostFromRR", r.packetsLostFromRR,
+			// 	"firstSR", r.srFirst,
+			// 	"lastSR", r.srNewest,
+			// )
 			continue
 		}
 

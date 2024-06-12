@@ -2,6 +2,8 @@ module github.com/livekit/livekit-server
 
 go 1.22
 
+replace github.com/livekit/mediatransportutil => github.com/noice-com/mediatransportutil v0.0.0-20240612160130-a35dafb46d12
+
 require (
 	github.com/avast/retry-go/v4 v4.6.0
 	github.com/bep/debounce v1.2.1
